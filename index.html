@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Image Checker</title>
+  <script src="https://unpkg.com/jimp@0.9.3/browser/lib/jimp.js"></script>
+</head>
+<body>
+  <input type="file" id="upload-file" multiple>
+  <div style="width: 300px; height: 300px;">
+    <img id="img" style="width: 100%;">
+  </div>
+  <pre id="json"></pre>
+
+<script>
+  const isBlackAndWhite = (image) => {
+    for (let x = 0; x < image.bitmap.width; x++) {
+      for (let y = 0; y < image.bitmap.height; y++) {
+        const hex = image.getPixelColor(x, y);
+        const rgb = Jimp.intToRGBA(hex);
+
+        const { r, g, b } = rgb;
+        if (r !== g || g !== b) {
+          console.log(`Pixel (${x}, ${y}) is colorful: `, rgb);
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  const ImageInfo = async (file) => {
+    const imageUrl = URL.createObjectURL(file);
+    const image = await Jimp.read(imageUrl);
+
+    return {
+      name: file.name,
+      type: image._originalMime,
+      size: file.size,
+      width: image.bitmap.width,
+      height: image.bitmap.height,
+      isBlackAndWhite: isBlackAndWhite(image),
+      url: imageUrl
+    };
+  };
+
+  document.getElementById('upload-file').addEventListener('change', async (event) => {
+    for (const file of event.target.files) {
+      const image = await ImageInfo(file);
+
+      // image info
+      console.group(image.name);
+      console.log(image);
+      console.groupEnd();
+
+      // draw image
+      document.getElementById('img').src = image.url;
+
+      // write json
+      document.getElementById('json').innerText = JSON.stringify(image, null, 2);
+    }
+  });
+</script>
+</body>
+</html>
