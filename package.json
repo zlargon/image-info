@@ -1,0 +1,10 @@
+{
+  "private": true,
+  "main": "index.js",
+  "dependencies": {
+    "jimp": "^0.9.3"
+  },
+  "scripts": {
+    "test": "node test.js"
+  }
+}
